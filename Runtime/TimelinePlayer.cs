@@ -9,12 +9,17 @@ using Object = UnityEngine.Object;
 namespace PragmaFramework.Timeline.Runtime {
     [RequireComponent(typeof(PlayableDirector))]
     public class TimelinePlayer : MonoBehaviour, ISerializationCallbackReceiver {
-        public TimelineHolder holder;
+        public List<ControlBindInfo> controlBindInfos;
+        public List<TrackBindInfo> trackBindInfos;
+        private Dictionary<TrackAsset, TrackBindInfo> trackBindMap;
+        private Dictionary<ControlPlayableAsset, ControlBindInfo> controlBindMap;
+        
         public List<SubPlayerBindInfo> subTimelines;
 
         private Dictionary<PropertyName, SubPlayerBindInfo> subPlayerBindMap;
 
-        private TimelinePlayer parent;
+        private List<GameObject> runtimeChildren;
+        private TimelinePlayer runtimeParent;
 
         public event Action<PlayableDirector> Stopped {
             add => Director.stopped += value;
@@ -24,6 +29,9 @@ namespace PragmaFramework.Timeline.Runtime {
         private bool initialized;
 
         private PlayableDirector playableDirector;
+        /// <summary>
+        /// Get the <c>PlayableDirector</c> of this timeline.
+        /// </summary>
         public PlayableDirector Director {
             get {
                 if (playableDirector == null) {
@@ -34,7 +42,7 @@ namespace PragmaFramework.Timeline.Runtime {
             }
         }
 
-        public void Init(Dictionary<string, Object> bindingMap) {
+        public void Init(IReadOnlyDictionary<string, object> bindingMap) {
             RestoreBindings(bindingMap);
 
             initialized = true;
@@ -56,29 +64,41 @@ namespace PragmaFramework.Timeline.Runtime {
         }
 
         public void ClearTimeline() {
+            runtimeChildren.ForEach(Destroy);
+            runtimeChildren.Clear();
+            runtimeParent = null;
             Destroy(gameObject);
         }
 
-        public void RestoreBindings(Dictionary<string, Object> bindingMap) {
+        private void RestoreBindings(IReadOnlyDictionary<string, object> bindingMap, TimelinePlayer parent = null) {
+            runtimeParent = parent;
+            
             var timelineAsset = (TimelineAsset) Director.playableAsset;
-            foreach (var (_, controlBindInfo) in holder.controlBindMap) {
+            foreach (var (_, controlBindInfo) in controlBindMap) {
                 var key = controlBindInfo.key;
                 if (bindingMap.TryGetValue(key, out var value)) {
-                    Director.SetReferenceValue(controlBindInfo.hash, value);
+                    Director.SetReferenceValue(controlBindInfo.hash, (Object) value);
                 }
             }
-            
+
+            runtimeChildren = new List<GameObject>(subPlayerBindMap.Count);
             foreach (var (hashName, subPlayerBindInfo) in subPlayerBindMap) {
-                Director.SetReferenceValue(hashName, subPlayerBindInfo.subPlayer.gameObject);
+                var instance = Instantiate(subPlayerBindInfo.subPlayer.gameObject);
+                Director.SetReferenceValue(hashName, instance);
+                
+                var player = instance.GetComponent<TimelinePlayer>();
+                player.RestoreBindings((IReadOnlyDictionary<string, object>) bindingMap[subPlayerBindInfo.key], this);
+                
+                runtimeChildren.Add(instance);
             }
             
             foreach (var track in timelineAsset.GetOutputTracks()) {
                 if (track == timelineAsset.markerTrack) continue;
                 
-                if (holder.trackBindMap.TryGetValue(track, out var trackBindInfo)) {
+                if (trackBindMap.TryGetValue(track, out var trackBindInfo)) {
                     var key = trackBindInfo.key;
                     if (bindingMap.TryGetValue(key, out var value)) {
-                        Director.SetGenericBinding(track, value);
+                        Director.SetGenericBinding(track, (Object) value);
                     }
                 }
             }
@@ -116,10 +136,10 @@ namespace PragmaFramework.Timeline.Runtime {
                 return;
             }
 
-            var oldControlBindings = holder.controlBindInfos;
-            var oldTrackBindings = holder.trackBindInfos;
-            holder.controlBindInfos = new List<ControlBindInfo>();
-            holder.trackBindInfos = new List<TrackBindInfo>();
+            var oldControlBindings = controlBindInfos;
+            var oldTrackBindings = trackBindInfos;
+            controlBindInfos = new List<ControlBindInfo>();
+            trackBindInfos = new List<TrackBindInfo>();
 
             var oldControlBindingMap = new Dictionary<PlayableAsset, ControlBindInfo>();
             if (oldControlBindings != null) {
@@ -153,7 +173,7 @@ namespace PragmaFramework.Timeline.Runtime {
                     trackBindInfo.key = oldTrackBindingMap.TryGetValue(track, out var oldTrackBindInfo)
                         ? oldTrackBindInfo.key
                         : track.name;
-                    holder.trackBindInfos.Add(trackBindInfo);
+                    trackBindInfos.Add(trackBindInfo);
                 }
                 foreach (var timelineClip in track.GetClips()) {
                     var asset = (PlayableAsset) timelineClip.asset;
@@ -199,7 +219,7 @@ namespace PragmaFramework.Timeline.Runtime {
                                 ? oldControlBindInfo.key
                                 : timelineClip.displayName;
 
-                        holder.controlBindInfos.Add(controlBindInfo);
+                        controlBindInfos.Add(controlBindInfo);
                     }
                 }
             }
@@ -213,6 +233,16 @@ namespace PragmaFramework.Timeline.Runtime {
             subPlayerBindMap = new Dictionary<PropertyName, SubPlayerBindInfo>();
             foreach (var subPlayerBindInfo in subTimelines) {
                 subPlayerBindMap.Add(subPlayerBindInfo.hash, subPlayerBindInfo);
+            }
+            
+            controlBindMap = new Dictionary<ControlPlayableAsset, ControlBindInfo>(controlBindInfos.Count);
+            foreach (var controlBindInfo in controlBindInfos) {
+                controlBindMap.Add(controlBindInfo.playableAsset, controlBindInfo);
+            }
+
+            trackBindMap = new Dictionary<TrackAsset, TrackBindInfo>(trackBindInfos.Count);
+            foreach (var trackBindInfo in trackBindInfos) {
+                trackBindMap.Add(trackBindInfo.trackAsset, trackBindInfo);
             }
         }
     }
