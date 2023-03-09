@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
 using Object = UnityEngine.Object;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
  
 namespace PragmaFramework.Timeline.Runtime {
     [RequireComponent(typeof(PlayableDirector))]
@@ -49,9 +52,7 @@ namespace PragmaFramework.Timeline.Runtime {
         }
 
         public void PlayTimeline(bool autoDestroyOnStop = false) {
-            if (!initialized) {
-                return;
-            }
+            if (!initialized) return;
 
             if (autoDestroyOnStop) {
                 Director.stopped += director => {
@@ -130,6 +131,7 @@ namespace PragmaFramework.Timeline.Runtime {
             // }
         }
 
+#if UNITY_EDITOR
         public void SaveTimeline() {
             if (PrefabUtility.IsPartOfPrefabAsset(gameObject)) {
                 Debug.LogError("Is prefab asset");
@@ -224,6 +226,7 @@ namespace PragmaFramework.Timeline.Runtime {
                 }
             }
         }
+#endif
 
         public void OnBeforeSerialize() {
             
