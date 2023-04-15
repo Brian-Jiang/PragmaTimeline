@@ -12,11 +12,21 @@ using UnityEditor;
 namespace PragmaFramework.Timeline.Runtime {
     [RequireComponent(typeof(PlayableDirector))]
     public class TimelinePlayer : MonoBehaviour, ISerializationCallbackReceiver {
+        /// <summary>
+        /// Bind info for con
+        /// </summary>
         public List<ControlBindInfo> controlBindInfos;
+        
+        /// <summary>
+        /// Bind info for track.
+        /// </summary>
         public List<TrackBindInfo> trackBindInfos;
         private Dictionary<TrackAsset, TrackBindInfo> trackBindMap;
         private Dictionary<ControlPlayableAsset, ControlBindInfo> controlBindMap;
         
+        /// <summary>
+        /// Bind info for child timelines
+        /// </summary>
         public List<SubPlayerBindInfo> subTimelines;
 
         private Dictionary<PropertyName, SubPlayerBindInfo> subPlayerBindMap;
@@ -32,8 +42,9 @@ namespace PragmaFramework.Timeline.Runtime {
         private bool initialized;
 
         private PlayableDirector playableDirector;
+        
         /// <summary>
-        /// Get the <c>PlayableDirector</c> of this timeline.
+        /// The <c>PlayableDirector</c> of this timeline player.
         /// </summary>
         public PlayableDirector Director {
             get {
@@ -45,12 +56,20 @@ namespace PragmaFramework.Timeline.Runtime {
             }
         }
 
+        /// <summary>
+        /// Initialize this timeline player with a bindingMap; it only does the initialization and does not play it yet.
+        /// </summary>
+        /// <param name="bindingMap"></param>
         public void Init(IReadOnlyDictionary<string, object> bindingMap) {
             RestoreBindings(bindingMap);
 
             initialized = true;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="autoDestroyOnStop"></param>
         public void PlayTimeline(bool autoDestroyOnStop = false) {
             if (!initialized) return;
 
@@ -64,6 +83,9 @@ namespace PragmaFramework.Timeline.Runtime {
             Director.Play();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public void ClearTimeline() {
             runtimeChildren.ForEach(Destroy);
             runtimeChildren.Clear();
