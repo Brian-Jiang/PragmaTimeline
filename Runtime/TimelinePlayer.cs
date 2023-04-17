@@ -67,9 +67,9 @@ namespace PragmaFramework.Timeline.Runtime {
         }
 
         /// <summary>
-        /// 
+        /// Play this timeline.
         /// </summary>
-        /// <param name="autoDestroyOnStop"></param>
+        /// <param name="autoDestroyOnStop">Auto destroy when the timeline stop.</param>
         public void PlayTimeline(bool autoDestroyOnStop = false) {
             if (!initialized) return;
 
@@ -125,32 +125,6 @@ namespace PragmaFramework.Timeline.Runtime {
                     }
                 }
             }
-            // foreach (var track in Director.playableAsset.outputs)
-            // {
-            //     if (track.sourceObject is ControlTrack)
-            //     {
-            //         ControlTrack ct = (ControlTrack)track.sourceObject;
-            //         if (ct.name == "nestedTimeline" || true)
-            //         {
-            //             foreach (TimelineClip timelineClip in ct.GetClips())
-            //             {
-            //                 ControlPlayableAsset playableAsset = (ControlPlayableAsset)timelineClip.asset;
-            //                 // playableAsset.postPlayback = ActivationControlPlayable.PostPlaybackState.Revert;
-            //                 // playableAsset.updateDirector = false;
-            //                 // playableAsset.updateParticle = false;
-            //
-            //                 var hash = playableAsset.GetHashCode();
-            //                 var id = playableAsset.GetInstanceID();
-            //                 print($"hash: {hash}, id: {id}");
-            //                 // set the reference of the nested timeline to the parent playable asset
-            //                 // Director.SetReferenceValue(playableAsset.sourceGameObject.exposedName, nestedTimeline.gameObject);
-            //                 
-            //                 // rebind the playableGraph of the parent timeline director
-            //                 Director.RebindPlayableGraphOutputs();
-            //             }
-            //         }
-            //     }
-            // }
         }
 
 #if UNITY_EDITOR
