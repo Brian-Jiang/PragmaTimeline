@@ -13,7 +13,7 @@ namespace PragmaFramework.Timeline.Runtime {
     [RequireComponent(typeof(PlayableDirector))]
     public class TimelinePlayer : MonoBehaviour, ISerializationCallbackReceiver {
         /// <summary>
-        /// Bind info for con
+        /// Bind info for control Track.
         /// </summary>
         public List<ControlBindInfo> controlBindInfos;
         
@@ -84,7 +84,7 @@ namespace PragmaFramework.Timeline.Runtime {
         }
 
         /// <summary>
-        /// 
+        /// Clear the timeline and remove all the runtime children.
         /// </summary>
         public void ClearTimeline() {
             runtimeChildren.ForEach(Destroy);
