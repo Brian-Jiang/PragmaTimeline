@@ -31,7 +31,7 @@ namespace PragmaFramework.Timeline.Runtime {
 
         private Dictionary<PropertyName, SubPlayerBindInfo> subPlayerBindMap;
 
-        private List<GameObject> runtimeChildren;
+        private List<TimelinePlayer> runtimeChildren;
         private TimelinePlayer runtimeParent;
 
         public event Action<PlayableDirector> Stopped {
@@ -87,7 +87,9 @@ namespace PragmaFramework.Timeline.Runtime {
         /// Clear the timeline and remove all the runtime children.
         /// </summary>
         public void ClearTimeline() {
-            runtimeChildren.ForEach(Destroy);
+            Director.Stop();
+            runtimeChildren.ForEach(child => child.ClearTimeline());
+            runtimeChildren.ForEach(child => Destroy(child.gameObject));
             runtimeChildren.Clear();
             runtimeParent = null;
             Destroy(gameObject);
@@ -97,22 +99,25 @@ namespace PragmaFramework.Timeline.Runtime {
             runtimeParent = parent;
             
             var timelineAsset = (TimelineAsset) Director.playableAsset;
-            foreach (var (_, controlBindInfo) in controlBindMap) {
+            foreach (var controlBind in controlBindMap) {
+                var controlBindInfo = controlBind.Value;
                 var key = controlBindInfo.key;
                 if (bindingMap.TryGetValue(key, out var value)) {
                     Director.SetReferenceValue(controlBindInfo.hash, (Object) value);
                 }
             }
 
-            runtimeChildren = new List<GameObject>(subPlayerBindMap.Count);
-            foreach (var (hashName, subPlayerBindInfo) in subPlayerBindMap) {
+            runtimeChildren = new List<TimelinePlayer>(subPlayerBindMap.Count);
+            foreach (var subPlayerBind in subPlayerBindMap) {
+                var hashName = subPlayerBind.Key;
+                var subPlayerBindInfo = subPlayerBind.Value;
                 var instance = Instantiate(subPlayerBindInfo.subPlayer.gameObject);
                 Director.SetReferenceValue(hashName, instance);
                 
                 var player = instance.GetComponent<TimelinePlayer>();
                 player.RestoreBindings((IReadOnlyDictionary<string, object>) bindingMap[subPlayerBindInfo.key], this);
                 
-                runtimeChildren.Add(instance);
+                runtimeChildren.Add(player);
             }
             
             foreach (var track in timelineAsset.GetOutputTracks()) {
@@ -175,7 +180,7 @@ namespace PragmaFramework.Timeline.Runtime {
                 }
                 foreach (var timelineClip in track.GetClips()) {
                     var asset = (PlayableAsset) timelineClip.asset;
-                    if (asset is not ControlPlayableAsset controlPlayableAsset) continue;
+                    if (!(asset is ControlPlayableAsset controlPlayableAsset)) continue;
                     var bindGO = controlPlayableAsset.sourceGameObject.Resolve(Director);
                     if (bindGO == null) continue;
                     
