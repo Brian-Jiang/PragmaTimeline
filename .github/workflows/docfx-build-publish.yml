@@ -34,6 +34,11 @@ jobs:
         uses: crazy-max/ghaction-chocolatey@v1
         with:
           args: install docfx --ignore-checksums
+          
+      - name: Setup wkhtmltopdf
+        uses: crazy-max/ghaction-chocolatey@v1
+        with:
+          args: install wkhtmltopdf --ignore-checksums
         
       - name: DocFX Build
         working-directory: Tools~/DocFx
