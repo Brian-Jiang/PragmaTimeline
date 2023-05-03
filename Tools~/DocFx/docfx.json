@@ -5,9 +5,8 @@
         {
           "src": "../..",
           "files": [
-            "Runtime/**/*.cs",
-            "Editor/**/*.cs"
-          ],
+            "Runtime/**/*.cs"
+          ]
         }
       ],
       "dest": "api",
@@ -21,41 +20,15 @@
       {
         "files": [
           "index.md",
-          "manual/intro.md",
           "toc.yml"
         ]
       },
       {
         "src": "api",
         "files": [
-            "*.yml"
-        ],
-        "dest": "api"
-      },
-      {
-        "src": "manual",
-        "files": [
           "*.yml"
         ],
-        "dest": "manual"
-      }
-    ],
-    "resource": [
-      {
-        "files": [
-          "images/**"
-        ]
-      }
-    ],
-    "overwrite": [
-      {
-        "files": [
-          "apidoc/**.md"
-        ],
-        "exclude": [
-          "obj/**",
-          "_site/**"
-        ]
+        "dest": "api"
       }
     ],
     "xref": [
@@ -70,6 +43,42 @@
     "template": [
       "statictoc"
     ],
+    "postProcessors": [],
+    "markdownEngineName": "markdig",
+    "noLangKeyword": false,
+    "keepFileLink": false,
+    "cleanupCacheHistory": false,
+    "disableGitFeatures": false
+  },
+  
+  "pdf": {
+    "content": [
+      {
+        "files": [
+          "index.md",
+          "toc.yml"
+        ]
+      },
+      {
+        "src": "api",
+        "files": [
+          "*.yml"
+        ],
+        "dest": "api"
+      }
+    ],
+    "xref": [
+      "https://normanderwan.github.io/UnityXrefMaps/xrefmap.yml"
+    ],
+    "xrefService": [
+      "https://xref.docs.microsoft.com/query?uid={uid}"
+    ],
+    "wkhtmltopdf": {
+      "additionalArguments": "--enable-local-file-access"
+    },
+    "dest": "_site_pdf",
+    "globalMetadataFiles": [],
+    "fileMetadataFiles": [],
     "postProcessors": [],
     "markdownEngineName": "markdig",
     "noLangKeyword": false,
