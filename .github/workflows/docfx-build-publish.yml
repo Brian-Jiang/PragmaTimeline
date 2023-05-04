@@ -41,8 +41,8 @@ jobs:
           args: install wkhtmltopdf --ignore-checksums
           
       - name: Copy readme
-        run: copy README.md Tools~/DocFx/index.md
-        shell: cmd
+        run: cp .\README.md .\Tools~\DocFx\index.md
+        shell: powershell
         
       - name: DocFX Build
         working-directory: Tools~/DocFx
