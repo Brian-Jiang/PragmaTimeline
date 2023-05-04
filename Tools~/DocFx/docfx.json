@@ -72,7 +72,8 @@
       }
     ],
     "xref": [
-      "https://normanderwan.github.io/UnityXrefMaps/xrefmap.yml"
+      "https://normanderwan.github.io/UnityXrefMaps/xrefmap.yml",
+      "https://docs.unity3d.com/Packages/com.unity.timeline@1.8/xrefmap.yml"
     ],
     "xrefService": [
       "https://xref.docs.microsoft.com/query?uid={uid}"
@@ -88,7 +89,7 @@
     "markdownEngineName": "markdig",
     "noLangKeyword": false,
     "keepFileLink": false,
-    "cleanupCacheHistory": false,
+    "cleanupCacheHistory": true,
     "disableGitFeatures": false
   }
 }

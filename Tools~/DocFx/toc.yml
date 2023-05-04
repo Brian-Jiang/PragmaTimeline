@@ -2,4 +2,4 @@ items:
 - name: Quick Start
   href: index.md
 - name: API Documentation
-  href: api/toc.yml
+  href: api/

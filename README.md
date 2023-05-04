@@ -17,7 +17,7 @@ See [Unity Timeline](https://docs.unity3d.com/Manual/TimelineSection.html) for m
 This will create several records of objects that you need to bind in runtime. 
 Change name of the records to something meaningful. Note that these are the names you will use in script.
 7. At runtime, play your timeline using following code:
-```
+```csharp
     var instance = Instantiate(prefab);
     var player = instance.GetComponent<TimelinePlayer>();
 

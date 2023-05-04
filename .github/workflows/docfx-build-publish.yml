@@ -39,6 +39,10 @@ jobs:
         uses: crazy-max/ghaction-chocolatey@v1
         with:
           args: install wkhtmltopdf --ignore-checksums
+          
+      - name: Copy readme
+        run: copy README.md Tools~/DocFx/index.md
+        shell: cmd
         
       - name: DocFX Build
         working-directory: Tools~/DocFx
@@ -50,6 +54,12 @@ jobs:
         with:
           name: _site
           path: Tools~/DocFx/_site
+          
+      - name: Upload PDF
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          name: _site_pdf
+          path: Tools~/DocFx/_site_pdf/DocFx.pdf
         
   deploy:
     if: github.event_name == 'push'
@@ -71,4 +81,3 @@ jobs:
           publish_branch: gh-pages
           publish_dir: _site
           force_orphan: true
-
