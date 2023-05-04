@@ -3,9 +3,9 @@
     {
       "src": [
         {
-          "src": "../..",
+          "src": "../../Runtime",
           "files": [
-            "Runtime/**/*.cs"
+            "**/*.cs"
           ]
         }
       ],
@@ -16,6 +16,11 @@
     }
   ],
   "build": {
+    "globalMetadata": {
+      "_appTitle": "Pragma Timeline",
+      "_appFooter": "Pragma Timeline",
+      "_enableSearch": true
+    },
     "content": [
       {
         "files": [
@@ -32,7 +37,8 @@
       }
     ],
     "xref": [
-      "https://normanderwan.github.io/UnityXrefMaps/xrefmap.yml"
+      "https://normanderwan.github.io/UnityXrefMaps/xrefmap.yml",
+      "https://docs.unity3d.com/Packages/com.unity.timeline@1.8/xrefmap.yml"
     ],
     "xrefService": [
       "https://xref.docs.microsoft.com/query?uid={uid}"
@@ -40,14 +46,12 @@
     "dest": "_site",
     "globalMetadataFiles": [],
     "fileMetadataFiles": [],
-    "template": [
-      "statictoc"
-    ],
+    "template": ["default", "modern"],
     "postProcessors": [],
     "markdownEngineName": "markdig",
     "noLangKeyword": false,
     "keepFileLink": false,
-    "cleanupCacheHistory": false,
+    "cleanupCacheHistory": true,
     "disableGitFeatures": false
   },
   
