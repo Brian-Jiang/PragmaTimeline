@@ -167,8 +167,9 @@ namespace PragmaFramework.Timeline.Runtime {
                 foreach (var binding in outputs) {
                     if (binding.outputTargetType == null) continue;
                     
-                    var bindingObject = (Component) Director.GetGenericBinding(track);
-                    if (bindingObject.transform.IsChildOf(transform)) continue;
+                    var bindingObject = Director.GetGenericBinding(track);
+                    if (bindingObject is Component component && component.transform.IsChildOf(transform) ||
+                        bindingObject is GameObject go && go.transform.IsChildOf(transform)) continue;
                         
                     var trackBindInfo = new TrackBindInfo {
                         trackAsset = track,
