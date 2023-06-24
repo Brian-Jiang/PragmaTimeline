@@ -1,9 +1,10 @@
 # Pragma Timeline
-#### version 0.7.0
+#### version 0.7.2
 
 ## Summary
 Pragma Timeline is a tool that can let you easily play timeline in runtime and bind to your scene objects. 
-See it in [asset store](https://u3d.as/33T7).
+See it in [asset store](https://u3d.as/33T7).  
+To understand how it works, please read [this article](https://medium.com/@bjjx1999/how-does-the-binding-of-unitys-timeline-work-309213d1aad4).
 
 ## Quick Start
 1. Create a scene by click `File -> New Scene -> PragmaTimelineEdit`. This scene is only used for editing timeline.
