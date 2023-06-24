@@ -1,0 +1,16 @@
+{
+    "name": "PragmaTimeline.Example",
+    "rootNamespace": "PragmaFramework.Timeline.Examples",
+    "references": [
+        "GUID:daf93e7bf06f3154fbe800d462414d0a"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
