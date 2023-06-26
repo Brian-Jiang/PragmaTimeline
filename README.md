@@ -2,8 +2,8 @@
 #### version 0.7.2
 
 ## Summary
-Pragma Timeline is a tool that can let you easily play timeline in runtime and bind to your scene objects. 
-See it in [asset store](https://u3d.as/33T7).  
+Pragma Timeline is a tool that can let you easily play timeline in runtime and bind to your scene objects.
+It supports exposed reference and generic binding, including your own track and clip.  
 To understand how it works, please read [this article](https://medium.com/@bjjx1999/how-does-the-binding-of-unitys-timeline-work-309213d1aad4).
 
 ## Quick Start
@@ -37,5 +37,5 @@ Change name of the records to something meaningful. Note that these are the name
 
 ## Supports
 If you have any questions, please comment at [Asset Store](https://u3d.as/33T7)  
-Or email me directly at: [bjjx1999@live.com](mailto:bjjx1999@live.com)  
+or leave an issue at [Github](https://github.com/Brian-Jiang/PragmaTimeline/issues).  
 Thank you for your support!
