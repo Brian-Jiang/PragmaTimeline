@@ -1,0 +1,152 @@
+﻿<!DOCTYPE html>
+<!--[if IE]><![endif]-->
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Pragma Timeline | Pragma Timeline </title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="title" content="Pragma Timeline | Pragma Timeline ">
+    <meta name="generator" content="docfx 2.59.4.0">
+    
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="stylesheet" href="styles/docfx.vendor.css">
+    <link rel="stylesheet" href="styles/docfx.css">
+    <link rel="stylesheet" href="styles/main.css">
+    <meta property="docfx:navrel" content="toc.html">
+    <meta property="docfx:tocrel" content="toc.html">
+    
+    <meta property="docfx:rel" content="">
+    
+  </head>
+  <body data-spy="scroll" data-target="#affix" data-offset="120">
+    <div id="wrapper">
+      <header>
+        
+        <nav id="autocollapse" class="navbar navbar-inverse ng-scope" role="navigation">
+          <div class="container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              
+              <a class="navbar-brand" href="index.html">
+                <img id="logo" class="svg" src="logo.svg" alt="">
+              </a>
+            </div>
+            <div class="collapse navbar-collapse" id="navbar">
+              <form class="navbar-form navbar-right" role="search" id="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" id="search-query" placeholder="Search" autocomplete="off">
+                </div>
+              </form>
+            </div>
+          </div>
+        </nav>
+        
+        <div class="subnav navbar navbar-default">
+          <div class="container hide-when-search" id="breadcrumb">
+            <ul class="breadcrumb">
+              <li></li>
+            </ul>
+          </div>
+        </div>
+      </header>
+      <div class="container body-content">
+        
+        <div id="search-results">
+          <div class="search-list">Search Results for <span></span></div>
+          <div class="sr-items">
+            <p><i class="glyphicon glyphicon-refresh index-loading"></i></p>
+          </div>
+          <ul id="pagination" data-first="First" data-prev="Previous" data-next="Next" data-last="Last"></ul>
+        </div>
+      </div>
+      <div role="main" class="container body-content hide-when-search">
+        <div class="article row grid">
+          <div class="col-md-10">
+            <article class="content wrap" id="_content" data-uid="">
+<h1 id="pragma-timeline">Pragma Timeline</h1>
+
+<h4 id="version-072">version 0.7.2</h4>
+<h2 id="summary">Summary</h2>
+<p>Pragma Timeline is a tool that can let you easily play timeline in runtime and bind to your scene objects.
+It supports exposed reference and generic binding, including your own track and clip.<br>
+To understand how it works, please read <a href="https://medium.com/@bjjx1999/how-does-the-binding-of-unitys-timeline-work-309213d1aad4">this article</a>.</p>
+<h2 id="quick-start">Quick Start</h2>
+<ol>
+<li>Create a scene by click <code>File -&gt; New Scene -&gt; PragmaTimelineEdit</code>. This scene is only used for editing timeline.</li>
+<li>Copy paste objects that you want to use in timeline to your new scene.</li>
+<li>Create a timeline asset by right click in Assets panel and click <code>Create -&gt; Timeline</code>.
+Then drag it to playable director of the Timeline game object in the scene.</li>
+<li>Drag Timeline game object to the Assets panel to make it a prefab.</li>
+<li>You can now start editing your timeline.
+See <a href="https://docs.unity3d.com/Manual/TimelineSection.html">Unity Timeline</a> for more information.</li>
+<li>When you finish, click the Update button on the inspector of the Timeline game object's TimelinePlayer component.
+This will create several records of objects that you need to bind in runtime.
+Change name of the records to something meaningful. Note that these are the names you will use in script.</li>
+<li>At runtime, play your timeline using following code:</li>
+</ol>
+<pre><code class="lang-csharp">    var instance = Instantiate(prefab);
+    var player = instance.GetComponent&lt;TimelinePlayer&gt;();
+
+    var map = new Dictionary&lt;string, object&gt; {
+        {&quot;name1&quot;, object1},
+        {&quot;name2&quot;, object2},
+    };
+    player.Init(map);
+    
+    player.Stopped += playableDirector =&gt; {
+        Debug.Log(&quot;Timeline stopped&quot;);
+    };
+    
+    player.PlayTimeline(true);
+</code></pre>
+<h2 id="supports">Supports</h2>
+<p>If you have any questions, please comment at <a href="https://u3d.as/33T7">Asset Store</a><br>
+or leave an issue at <a href="https://github.com/Brian-Jiang/PragmaTimeline/issues">Github</a>.<br>
+Thank you for your support!</p>
+</article>
+          </div>
+          
+          <div class="hidden-sm col-md-2" role="complementary">
+            <div class="sideaffix">
+              <div class="contribution">
+                <ul class="nav">
+                  <li>
+                    <a href="https://github.com/Brian-Jiang/PragmaTimeline/blob/main/Tools~/DocFx/index.md/#L1" class="contribution-link">Improve this Doc</a>
+                  </li>
+                </ul>
+              </div>
+              <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+                <h5>In This Article</h5>
+                <div></div>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer>
+        <div class="grad-bottom"></div>
+        <div class="footer">
+          <div class="container">
+            <span class="pull-right">
+              <a href="#top">Back to top</a>
+            </span>
+            Pragma Timeline
+            
+          </div>
+        </div>
+      </footer>
+    </div>
+    
+    <script type="text/javascript" src="styles/docfx.vendor.js"></script>
+    <script type="text/javascript" src="styles/docfx.js"></script>
+    <script type="text/javascript" src="styles/main.js"></script>
+  </body>
+</html>

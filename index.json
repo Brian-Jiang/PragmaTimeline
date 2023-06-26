@@ -1,0 +1,32 @@
+{
+  "api/PragmaFramework.Timeline.Runtime.ControlBindInfo.html": {
+    "href": "api/PragmaFramework.Timeline.Runtime.ControlBindInfo.html",
+    "title": "Struct ControlBindInfo | Pragma Timeline",
+    "keywords": "Struct ControlBindInfo Namespace : PragmaFramework.Timeline.Runtime Assembly : cs.temp.dll.dll Syntax [Serializable] public struct ControlBindInfo Fields hash Declaration public int hash Field Value Type Description Int32 key Declaration public string key Field Value Type Description String playableAsset Declaration public ControlPlayableAsset playableAsset Field Value Type Description ControlPlayableAsset trackAsset Declaration public TrackAsset trackAsset Field Value Type Description TrackAsset"
+  },
+  "api/PragmaFramework.Timeline.Runtime.html": {
+    "href": "api/PragmaFramework.Timeline.Runtime.html",
+    "title": "Namespace PragmaFramework.Timeline.Runtime | Pragma Timeline",
+    "keywords": "Namespace PragmaFramework.Timeline.Runtime Classes TimelinePlayer Structs ControlBindInfo SubPlayerBindInfo TrackBindInfo"
+  },
+  "api/PragmaFramework.Timeline.Runtime.SubPlayerBindInfo.html": {
+    "href": "api/PragmaFramework.Timeline.Runtime.SubPlayerBindInfo.html",
+    "title": "Struct SubPlayerBindInfo | Pragma Timeline",
+    "keywords": "Struct SubPlayerBindInfo Namespace : PragmaFramework.Timeline.Runtime Assembly : cs.temp.dll.dll Syntax [Serializable] public struct SubPlayerBindInfo Fields hash Declaration public int hash Field Value Type Description Int32 key Declaration public string key Field Value Type Description String playableAsset Declaration public ControlPlayableAsset playableAsset Field Value Type Description ControlPlayableAsset subPlayer Declaration public TimelinePlayer subPlayer Field Value Type Description TimelinePlayer"
+  },
+  "api/PragmaFramework.Timeline.Runtime.TimelinePlayer.html": {
+    "href": "api/PragmaFramework.Timeline.Runtime.TimelinePlayer.html",
+    "title": "Class TimelinePlayer | Pragma Timeline",
+    "keywords": "Class TimelinePlayer Inheritance Object TimelinePlayer Implements ISerializationCallbackReceiver Namespace : PragmaFramework.Timeline.Runtime Assembly : cs.temp.dll.dll Syntax public class TimelinePlayer : MonoBehaviour Fields controlBindInfos Bind info for control Track. Declaration public List<ControlBindInfo> controlBindInfos Field Value Type Description List < ControlBindInfo > subTimelines Bind info for child timelines Declaration public List<SubPlayerBindInfo> subTimelines Field Value Type Description List < SubPlayerBindInfo > trackBindInfos Bind info for track. Declaration public List<TrackBindInfo> trackBindInfos Field Value Type Description List < TrackBindInfo > Properties Director The PlayableDirector of this timeline player. Declaration public PlayableDirector Director { get; } Property Value Type Description PlayableDirector Methods ClearTimeline() Clear the timeline and remove all the runtime children. Declaration public void ClearTimeline() Init(IReadOnlyDictionary<String, Object>) Initialize this timeline player with a bindingMap; it only does the initialization and does not play it yet. Declaration public void Init(IReadOnlyDictionary<string, object> bindingMap) Parameters Type Name Description IReadOnlyDictionary < String , Object > bindingMap OnAfterDeserialize() Declaration public void OnAfterDeserialize() OnBeforeSerialize() Declaration public void OnBeforeSerialize() PlayTimeline(Boolean) Play this timeline. Declaration public void PlayTimeline(bool autoDestroyOnStop = false) Parameters Type Name Description Boolean autoDestroyOnStop Auto destroy when the timeline stop. Events Stopped Declaration public event Action<PlayableDirector> Stopped Event Type Type Description Action < PlayableDirector > Implements ISerializationCallbackReceiver"
+  },
+  "api/PragmaFramework.Timeline.Runtime.TrackBindInfo.html": {
+    "href": "api/PragmaFramework.Timeline.Runtime.TrackBindInfo.html",
+    "title": "Struct TrackBindInfo | Pragma Timeline",
+    "keywords": "Struct TrackBindInfo Namespace : PragmaFramework.Timeline.Runtime Assembly : cs.temp.dll.dll Syntax [Serializable] public struct TrackBindInfo Fields key Declaration public string key Field Value Type Description String trackAsset Declaration public TrackAsset trackAsset Field Value Type Description TrackAsset"
+  },
+  "index.html": {
+    "href": "index.html",
+    "title": "Pragma Timeline | Pragma Timeline",
+    "keywords": "Pragma Timeline version 0.7.2 Summary Pragma Timeline is a tool that can let you easily play timeline in runtime and bind to your scene objects. It supports exposed reference and generic binding, including your own track and clip. To understand how it works, please read this article . Quick Start Create a scene by click File -> New Scene -> PragmaTimelineEdit . This scene is only used for editing timeline. Copy paste objects that you want to use in timeline to your new scene. Create a timeline asset by right click in Assets panel and click Create -> Timeline . Then drag it to playable director of the Timeline game object in the scene. Drag Timeline game object to the Assets panel to make it a prefab. You can now start editing your timeline. See Unity Timeline for more information. When you finish, click the Update button on the inspector of the Timeline game object's TimelinePlayer component. This will create several records of objects that you need to bind in runtime. Change name of the records to something meaningful. Note that these are the names you will use in script. At runtime, play your timeline using following code: var instance = Instantiate(prefab); var player = instance.GetComponent<TimelinePlayer>(); var map = new Dictionary<string, object> { {\"name1\", object1}, {\"name2\", object2}, }; player.Init(map); player.Stopped += playableDirector => { Debug.Log(\"Timeline stopped\"); }; player.PlayTimeline(true); Supports If you have any questions, please comment at Asset Store or leave an issue at Github . Thank you for your support!"
+  }
+}
