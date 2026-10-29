@@ -39,6 +39,8 @@ namespace PragmaFramework.Timeline.Runtime {
             remove => Director.stopped -= value;
         }
 
+        private static readonly IReadOnlyDictionary<string, object> EmptyBindingMap = new Dictionary<string, object>();
+
         private bool initialized;
 
         private PlayableDirector playableDirector;
@@ -111,12 +113,28 @@ namespace PragmaFramework.Timeline.Runtime {
             foreach (var subPlayerBind in subPlayerBindMap) {
                 var hashName = subPlayerBind.Key;
                 var subPlayerBindInfo = subPlayerBind.Value;
-                var instance = Instantiate(subPlayerBindInfo.subPlayer.gameObject);
-                Director.SetReferenceValue(hashName, instance);
-                
-                var player = instance.GetComponent<TimelinePlayer>();
-                player.RestoreBindings((IReadOnlyDictionary<string, object>) bindingMap[subPlayerBindInfo.key], this);
-                
+                var subPlayer = subPlayerBindInfo.subPlayer;
+                if (subPlayer == null) continue;
+
+                TimelinePlayer player;
+                if (subPlayer.transform.IsChildOf(transform)) {
+                    // Child sub player is already referenced by this director.
+                    player = subPlayer;
+                } else {
+                    var instance = Instantiate(subPlayer.gameObject);
+                    Director.SetReferenceValue(hashName, instance);
+                    player = instance.GetComponent<TimelinePlayer>();
+                }
+
+                var key = subPlayerBindInfo.key;
+                if (key == null ||
+                    !bindingMap.TryGetValue(key, out var value) ||
+                    !(value is IReadOnlyDictionary<string, object> subBindingMap)) {
+                    Debug.LogWarning($"No binding map found for sub timeline '{key}'", this);
+                    subBindingMap = EmptyBindingMap;
+                }
+                player.RestoreBindings(subBindingMap, this);
+
                 runtimeChildren.Add(player);
             }
             
@@ -141,20 +159,31 @@ namespace PragmaFramework.Timeline.Runtime {
 
             var oldControlBindings = controlBindInfos;
             var oldTrackBindings = trackBindInfos;
+            var oldSubTimelines = subTimelines;
             controlBindInfos = new List<ControlBindInfo>();
             trackBindInfos = new List<TrackBindInfo>();
 
             var oldControlBindingMap = new Dictionary<PlayableAsset, ControlBindInfo>();
             if (oldControlBindings != null) {
                 foreach (var oldControlBinding in oldControlBindings) {
-                    oldControlBindingMap.Add(oldControlBinding.playableAsset, oldControlBinding);
+                    if (oldControlBinding.playableAsset == null) continue;
+                    oldControlBindingMap[oldControlBinding.playableAsset] = oldControlBinding;
                 }
             }
 
             var oldTrackBindingMap = new Dictionary<TrackAsset, TrackBindInfo>();
             if (oldTrackBindings != null) {
                 foreach (var oldTrackBinding in oldTrackBindings) {
-                    oldTrackBindingMap.Add(oldTrackBinding.trackAsset, oldTrackBinding);
+                    if (oldTrackBinding.trackAsset == null) continue;
+                    oldTrackBindingMap[oldTrackBinding.trackAsset] = oldTrackBinding;
+                }
+            }
+
+            var oldSubTimelineMap = new Dictionary<PlayableAsset, SubPlayerBindInfo>();
+            if (oldSubTimelines != null) {
+                foreach (var oldSubTimeline in oldSubTimelines) {
+                    if (oldSubTimeline.playableAsset == null) continue;
+                    oldSubTimelineMap[oldSubTimeline.playableAsset] = oldSubTimeline;
                 }
             }
 
@@ -162,22 +191,29 @@ namespace PragmaFramework.Timeline.Runtime {
             var timelineAsset = (TimelineAsset) Director.playableAsset;
             foreach (var track in timelineAsset.GetOutputTracks()) {
                 if (track == timelineAsset.markerTrack) continue;
-                
-                var outputs = track.outputs;
-                foreach (var binding in outputs) {
-                    if (binding.outputTargetType == null) continue;
-                    
+
+                var hasBindableOutput = false;
+                foreach (var output in track.outputs) {
+                    if (output.outputTargetType != null) {
+                        hasBindableOutput = true;
+                        break;
+                    }
+                }
+
+                if (hasBindableOutput) {
                     var bindingObject = Director.GetGenericBinding(track);
-                    if (bindingObject is Component component && component.transform.IsChildOf(transform) ||
-                        bindingObject is GameObject go && go.transform.IsChildOf(transform)) continue;
-                        
-                    var trackBindInfo = new TrackBindInfo {
-                        trackAsset = track,
-                    };
-                    trackBindInfo.key = oldTrackBindingMap.TryGetValue(track, out var oldTrackBindInfo)
-                        ? oldTrackBindInfo.key
-                        : track.name;
-                    trackBindInfos.Add(trackBindInfo);
+                    var isChildBinding =
+                        bindingObject is Component component && component.transform.IsChildOf(transform) ||
+                        bindingObject is GameObject go && go.transform.IsChildOf(transform);
+                    if (!isChildBinding) {
+                        var trackBindInfo = new TrackBindInfo {
+                            trackAsset = track,
+                        };
+                        trackBindInfo.key = oldTrackBindingMap.TryGetValue(track, out var oldTrackBindInfo)
+                            ? oldTrackBindInfo.key
+                            : track.name;
+                        trackBindInfos.Add(trackBindInfo);
+                    }
                 }
                 foreach (var timelineClip in track.GetClips()) {
                     var asset = (PlayableAsset) timelineClip.asset;
@@ -186,8 +222,13 @@ namespace PragmaFramework.Timeline.Runtime {
                     if (bindGO == null) continue;
                     
                     if (bindGO.TryGetComponent<PlayableDirector>(out _) && bindGO.TryGetComponent<TimelinePlayer>(out var subPlayer)) {
+                        var subKey = oldSubTimelineMap.TryGetValue(controlPlayableAsset, out var oldSubTimeline)
+                            ? oldSubTimeline.key
+                            : timelineClip.displayName;
+
                         if (bindGO.transform.IsChildOf(transform)) {
                             subTimelines.Add(new SubPlayerBindInfo {
+                                key = subKey,
                                 hash = controlPlayableAsset.sourceGameObject.exposedName.GetHashCode(),
                                 playableAsset = controlPlayableAsset,
                                 subPlayer = subPlayer,
@@ -199,6 +240,7 @@ namespace PragmaFramework.Timeline.Runtime {
                             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
                             if (prefab.TryGetComponent<TimelinePlayer>(out var prefabPlayer)) {
                                 subTimelines.Add(new SubPlayerBindInfo {
+                                    key = subKey,
                                     hash = controlPlayableAsset.sourceGameObject.exposedName.GetHashCode(),
                                     playableAsset = controlPlayableAsset,
                                     subPlayer = prefabPlayer,
@@ -237,17 +279,19 @@ namespace PragmaFramework.Timeline.Runtime {
         public void OnAfterDeserialize() {
             subPlayerBindMap = new Dictionary<PropertyName, SubPlayerBindInfo>();
             foreach (var subPlayerBindInfo in subTimelines) {
-                subPlayerBindMap.Add(subPlayerBindInfo.hash, subPlayerBindInfo);
+                subPlayerBindMap[subPlayerBindInfo.hash] = subPlayerBindInfo;
             }
-            
+
             controlBindMap = new Dictionary<ControlPlayableAsset, ControlBindInfo>(controlBindInfos.Count);
             foreach (var controlBindInfo in controlBindInfos) {
-                controlBindMap.Add(controlBindInfo.playableAsset, controlBindInfo);
+                if (controlBindInfo.playableAsset is null) continue;
+                controlBindMap[controlBindInfo.playableAsset] = controlBindInfo;
             }
 
             trackBindMap = new Dictionary<TrackAsset, TrackBindInfo>(trackBindInfos.Count);
             foreach (var trackBindInfo in trackBindInfos) {
-                trackBindMap.Add(trackBindInfo.trackAsset, trackBindInfo);
+                if (trackBindInfo.trackAsset is null) continue;
+                trackBindMap[trackBindInfo.trackAsset] = trackBindInfo;
             }
         }
     }
