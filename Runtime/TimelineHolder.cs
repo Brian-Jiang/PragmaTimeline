@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
 
@@ -9,7 +10,7 @@ namespace PragmaFramework.Timeline.Runtime {
     [Serializable]
     public struct ControlBindInfo {
         public string key;
-        public int hash;
+        public PropertyName exposedName;
         /// <summary>
         /// The track that owns the reference, or the track of the clip or marker that owns it.
         /// </summary>
@@ -29,7 +30,7 @@ namespace PragmaFramework.Timeline.Runtime {
     [Serializable]
     public struct SubPlayerBindInfo {
         public string key;
-        public int hash;
+        public PropertyName exposedName;
         public ControlPlayableAsset playableAsset;
         public TimelinePlayer subPlayer;
     }
