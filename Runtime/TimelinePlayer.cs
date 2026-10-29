@@ -13,16 +13,16 @@ namespace PragmaFramework.Timeline.Runtime {
     [RequireComponent(typeof(PlayableDirector))]
     public class TimelinePlayer : MonoBehaviour, ISerializationCallbackReceiver {
         /// <summary>
-        /// Bind info for control Track.
+        /// Bind info for exposed references of tracks, clips and markers, including control clips and custom ones.
         /// </summary>
         public List<ControlBindInfo> controlBindInfos;
-        
+
         /// <summary>
         /// Bind info for track.
         /// </summary>
         public List<TrackBindInfo> trackBindInfos;
         private Dictionary<TrackAsset, TrackBindInfo> trackBindMap;
-        private Dictionary<ControlPlayableAsset, ControlBindInfo> controlBindMap;
+        private Dictionary<PropertyName, ControlBindInfo> controlBindMap;
         
         /// <summary>
         /// Bind info for child timelines
@@ -214,11 +214,10 @@ namespace PragmaFramework.Timeline.Runtime {
             controlBindInfos = new List<ControlBindInfo>();
             trackBindInfos = new List<TrackBindInfo>();
 
-            var oldControlBindingMap = new Dictionary<PlayableAsset, ControlBindInfo>();
+            var oldControlBindingMap = new Dictionary<int, ControlBindInfo>();
             if (oldControlBindings != null) {
                 foreach (var oldControlBinding in oldControlBindings) {
-                    if (oldControlBinding.playableAsset == null) continue;
-                    oldControlBindingMap[oldControlBinding.playableAsset] = oldControlBinding;
+                    oldControlBindingMap[oldControlBinding.hash] = oldControlBinding;
                 }
             }
 
@@ -230,11 +229,10 @@ namespace PragmaFramework.Timeline.Runtime {
                 }
             }
 
-            var oldSubTimelineMap = new Dictionary<PlayableAsset, SubPlayerBindInfo>();
+            var oldSubTimelineMap = new Dictionary<int, SubPlayerBindInfo>();
             if (oldSubTimelines != null) {
                 foreach (var oldSubTimeline in oldSubTimelines) {
-                    if (oldSubTimeline.playableAsset == null) continue;
-                    oldSubTimelineMap[oldSubTimeline.playableAsset] = oldSubTimeline;
+                    oldSubTimelineMap[oldSubTimeline.hash] = oldSubTimeline;
                 }
             }
 
@@ -266,61 +264,110 @@ namespace PragmaFramework.Timeline.Runtime {
                         trackBindInfos.Add(trackBindInfo);
                     }
                 }
-                foreach (var timelineClip in track.GetClips()) {
-                    var asset = (PlayableAsset) timelineClip.asset;
-                    if (!(asset is ControlPlayableAsset controlPlayableAsset)) continue;
-                    var bindGO = controlPlayableAsset.sourceGameObject.Resolve(Director);
-                    if (bindGO == null) continue;
-                    
-                    if (bindGO.TryGetComponent<PlayableDirector>(out _) && bindGO.TryGetComponent<TimelinePlayer>(out var subPlayer)) {
-                        var subKey = oldSubTimelineMap.TryGetValue(controlPlayableAsset, out var oldSubTimeline)
-                            ? oldSubTimeline.key
-                            : timelineClip.displayName;
+            }
 
-                        if (bindGO.transform.IsChildOf(transform)) {
+            var exposedOwners = CollectExposedReferences(timelineAsset);
+            var references = new SerializedObject(Director).FindProperty("m_ExposedReferences.m_References");
+            for (var i = 0; i < references.arraySize; i++) {
+                var reference = references.GetArrayElementAtIndex(i);
+                var exposedName = reference.FindPropertyRelative("first").stringValue;
+                var value = reference.FindPropertyRelative("second").objectReferenceValue;
+                
+                if (value == null || !exposedOwners.TryGetValue(exposedName, out var owner)) continue;
+                if (EditorUtility.IsPersistent(value)) continue;
+
+                var hash = new PropertyName(exposedName).GetHashCode();
+                var bindGO = value is Component component ? component.gameObject : value as GameObject;
+
+                if (owner.asset is ControlPlayableAsset controlPlayableAsset && bindGO != null &&
+                    bindGO.TryGetComponent<PlayableDirector>(out _) && bindGO.TryGetComponent<TimelinePlayer>(out var subPlayer)) {
+                    var subKey = oldSubTimelineMap.TryGetValue(hash, out var oldSubTimeline)
+                        ? oldSubTimeline.key
+                        : owner.label;
+
+                    if (bindGO.transform.IsChildOf(transform)) {
+                        subTimelines.Add(new SubPlayerBindInfo {
+                            key = subKey,
+                            hash = hash,
+                            playableAsset = controlPlayableAsset,
+                            subPlayer = subPlayer,
+                        });
+                    } else if (PrefabUtility.IsAnyPrefabInstanceRoot(subPlayer.gameObject)) {
+                        var prefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(subPlayer);
+                        if (string.IsNullOrEmpty(prefabPath)) continue;
+
+                        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                        if (prefab.TryGetComponent<TimelinePlayer>(out var prefabPlayer)) {
                             subTimelines.Add(new SubPlayerBindInfo {
                                 key = subKey,
-                                hash = controlPlayableAsset.sourceGameObject.exposedName.GetHashCode(),
+                                hash = hash,
                                 playableAsset = controlPlayableAsset,
-                                subPlayer = subPlayer,
+                                subPlayer = prefabPlayer,
                             });
-                        } else if (PrefabUtility.IsAnyPrefabInstanceRoot(subPlayer.gameObject)) {
-                            var prefabPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(subPlayer);
-                            if (string.IsNullOrEmpty(prefabPath)) continue;
-                                
-                            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-                            if (prefab.TryGetComponent<TimelinePlayer>(out var prefabPlayer)) {
-                                subTimelines.Add(new SubPlayerBindInfo {
-                                    key = subKey,
-                                    hash = controlPlayableAsset.sourceGameObject.exposedName.GetHashCode(),
-                                    playableAsset = controlPlayableAsset,
-                                    subPlayer = prefabPlayer,
-                                });
-                            } else {
-                                Debug.LogError($"Sub timeline '{subKey}': prefab '{prefabPath}' has no " +
-                                               $"{nameof(TimelinePlayer)} on its root; skipped.", subPlayer);
-                            }
                         } else {
-                            Debug.LogError($"Sub timeline '{subKey}' ('{bindGO.name}') must be a child of '{name}' " +
-                                           "or a prefab instance root to be restored at runtime; skipped.", bindGO);
+                            Debug.LogError($"Sub timeline '{subKey}': prefab '{prefabPath}' has no " +
+                                           $"{nameof(TimelinePlayer)} on its root; skipped.", subPlayer);
                         }
-                            
                     } else {
-                        if (bindGO.transform.IsChildOf(transform)) continue;
-                            
-                        var controlBindInfo = new ControlBindInfo {
-                            hash = controlPlayableAsset.sourceGameObject.exposedName.GetHashCode(),
-                            trackAsset = track,
-                            playableAsset = controlPlayableAsset,
-                        };
-                        controlBindInfo.key =
-                            oldControlBindingMap.TryGetValue(controlPlayableAsset, out var oldControlBindInfo)
-                                ? oldControlBindInfo.key
-                                : timelineClip.displayName;
+                        Debug.LogError($"Sub timeline '{subKey}' ('{bindGO.name}') must be a child of '{name}' " +
+                                       "or a prefab instance root to be restored at runtime; skipped.", bindGO);
+                    }
+                } else {
+                    if (bindGO != null && bindGO.transform.IsChildOf(transform)) continue;
 
-                        controlBindInfos.Add(controlBindInfo);
+                    var controlBindInfo = new ControlBindInfo {
+                        hash = hash,
+                        trackAsset = owner.track,
+                        playableAsset = owner.asset,
+                    };
+                    controlBindInfo.key = oldControlBindingMap.TryGetValue(hash, out var oldControlBindInfo)
+                        ? oldControlBindInfo.key
+                        : owner.label;
+
+                    controlBindInfos.Add(controlBindInfo);
+                }
+            }
+        }
+        
+        private static Dictionary<string, (TrackAsset track, PlayableAsset asset, string label)> CollectExposedReferences(
+            TimelineAsset timelineAsset) {
+            var owners = new Dictionary<string, (TrackAsset track, PlayableAsset asset, string label)>();
+            foreach (var track in timelineAsset.GetOutputTracks()) {
+                AddExposedReferences(owners, track, track, track, track.name);
+                foreach (var timelineClip in track.GetClips()) {
+                    var asset = (PlayableAsset) timelineClip.asset;
+                    AddExposedReferences(owners, asset, track, asset, timelineClip.displayName);
+                }
+                foreach (var marker in track.GetMarkers()) {
+                    if (marker is Object markerObject) {
+                        AddExposedReferences(owners, markerObject, track, null, $"{track.name}.{marker.GetType().Name}");
                     }
                 }
+            }
+
+            return owners;
+        }
+
+        private static void AddExposedReferences(Dictionary<string, (TrackAsset track, PlayableAsset asset, string label)> owners,
+            Object source, TrackAsset track, PlayableAsset asset, string label) {
+            if (source == null) return;
+
+            var exposedProperties = new List<SerializedProperty>();
+            var property = new SerializedObject(source).GetIterator();
+            var enterChildren = true;
+            while (property.Next(enterChildren)) {
+                enterChildren = property.propertyType == SerializedPropertyType.Generic;
+                if (property.propertyType == SerializedPropertyType.ExposedReference) {
+                    exposedProperties.Add(property.Copy());
+                }
+            }
+
+            foreach (var exposedProperty in exposedProperties) {
+                var exposedName = exposedProperty.FindPropertyRelative("exposedName").stringValue;
+                if (string.IsNullOrEmpty(exposedName) || owners.ContainsKey(exposedName)) continue;
+
+                owners[exposedName] = (track, asset,
+                    exposedProperties.Count > 1 ? $"{label}.{exposedProperty.displayName}" : label);
             }
         }
 #endif
@@ -335,10 +382,9 @@ namespace PragmaFramework.Timeline.Runtime {
                 subPlayerBindMap[subPlayerBindInfo.hash] = subPlayerBindInfo;
             }
 
-            controlBindMap = new Dictionary<ControlPlayableAsset, ControlBindInfo>(controlBindInfos.Count);
+            controlBindMap = new Dictionary<PropertyName, ControlBindInfo>(controlBindInfos.Count);
             foreach (var controlBindInfo in controlBindInfos) {
-                if (controlBindInfo.playableAsset is null) continue;
-                controlBindMap[controlBindInfo.playableAsset] = controlBindInfo;
+                controlBindMap[controlBindInfo.hash] = controlBindInfo;
             }
 
             trackBindMap = new Dictionary<TrackAsset, TrackBindInfo>(trackBindInfos.Count);

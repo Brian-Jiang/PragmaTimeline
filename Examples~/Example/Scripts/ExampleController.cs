@@ -46,7 +46,7 @@ namespace PragmaTimeline.Examples {
             });
         
             btnStop.onClick.AddListener(() => {
-                var players = FindObjectsOfType<TimelinePlayer>();
+                var players = FindObjectsByType<TimelinePlayer>(FindObjectsSortMode.None);
                 foreach (var player in players) {
                     player.ClearTimeline();
                 }

@@ -2,7 +2,8 @@
     "name": "PragmaTimeline.Example",
     "rootNamespace": "PragmaFramework.Timeline.Examples",
     "references": [
-        "GUID:daf93e7bf06f3154fbe800d462414d0a"
+        "GUID:daf93e7bf06f3154fbe800d462414d0a",
+        "GUID:2bafac87e7f4b9b418d9448d219b01ab"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
