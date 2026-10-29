@@ -25,12 +25,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5533094490635806905}
+  serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!320 &5533094490635806910
 PlayableDirector:
@@ -71,10 +72,10 @@ MonoBehaviour:
     trackAsset: {fileID: 6490949027543079040, guid: 47f77ddfc1f53994ab0f99f8ca174fb9, type: 2}
   subTimelines:
   - key: Timeline1
-    hash: -947535455
+    exposedName: c7dd6cda72c045d408acb63408fec9f2
     playableAsset: {fileID: -8195894367290727337, guid: 47f77ddfc1f53994ab0f99f8ca174fb9, type: 2}
     subPlayer: {fileID: 1587996807017346611, guid: 0df7d1ec574cf6e4c93c283fb887280e, type: 3}
   - key: Timeline2
-    hash: 1502366763
+    exposedName: 019834dc688ca9d44b70dc85467bcf47
     playableAsset: {fileID: -7193842862900051618, guid: 47f77ddfc1f53994ab0f99f8ca174fb9, type: 2}
     subPlayer: {fileID: 3445141871237962476, guid: 5b5c354d2fdd0ab4bbc1309d9aeaf7e3, type: 3}

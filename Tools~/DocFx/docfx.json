@@ -53,43 +53,5 @@
     "keepFileLink": false,
     "cleanupCacheHistory": true,
     "disableGitFeatures": false
-  },
-  
-  "pdf": {
-    "content": [
-      {
-        "files": [
-          "index.md",
-          "toc.yml"
-        ]
-      },
-      {
-        "src": "api",
-        "files": [
-          "*.yml"
-        ],
-        "dest": "api"
-      }
-    ],
-    "xref": [
-      "https://normanderwan.github.io/UnityXrefMaps/xrefmap.yml",
-      "https://docs.unity3d.com/Packages/com.unity.timeline@1.8/xrefmap.yml"
-    ],
-    "xrefService": [
-      "https://xref.docs.microsoft.com/query?uid={uid}"
-    ],
-    "wkhtmltopdf": {
-      "additionalArguments": "--enable-local-file-access"
-    },
-    "noStdin" : true,
-    "dest": "_site_pdf",
-    "globalMetadataFiles": [],
-    "fileMetadataFiles": [],
-    "postProcessors": [],
-    "markdownEngineName": "markdig",
-    "noLangKeyword": false,
-    "keepFileLink": false,
-    "cleanupCacheHistory": true,
-    "disableGitFeatures": false
   }
 }
