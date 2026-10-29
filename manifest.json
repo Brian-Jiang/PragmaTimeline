@@ -1,0 +1,161 @@
+{
+  "homepages": [],
+  "source_base_path": "D:/a/PragmaTimeline/PragmaTimeline/Tools~/DocFx",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "Resource",
+      "output": {
+        "resource": {
+          "relative_path": "index.json"
+        }
+      },
+      "is_incremental": false
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/PragmaFramework.Timeline.Runtime.ControlBindInfo.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/PragmaFramework.Timeline.Runtime.ControlBindInfo.html",
+          "hash": "H+64flLwnb29GzO8p9h6SnCLJm2fekahpJoihkLrrok="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/PragmaFramework.Timeline.Runtime.SubPlayerBindInfo.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/PragmaFramework.Timeline.Runtime.SubPlayerBindInfo.html",
+          "hash": "DsPdK0d+l7jnow4zteTHB0omDNA1YO9WLNjk29+jwNM="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/PragmaFramework.Timeline.Runtime.TimelinePlayer.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/PragmaFramework.Timeline.Runtime.TimelinePlayer.html",
+          "hash": "rgcTDyYyy4qGUmAiAWpecWUHMMiKBq4zjUbWHX37RYo="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/PragmaFramework.Timeline.Runtime.TrackBindInfo.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/PragmaFramework.Timeline.Runtime.TrackBindInfo.html",
+          "hash": "572hWh7WMLfHYDoeAfXpSKxKQXVdTOjumezfJPo7gh8="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "ManagedReference",
+      "source_relative_path": "api/PragmaFramework.Timeline.Runtime.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/PragmaFramework.Timeline.Runtime.html",
+          "hash": "/+j96c1WUfv4Te0w2uISO9hcg9yIQ6L6uGyB8bE7AQk="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "api/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/toc.html",
+          "hash": "jjO4IAEKYKJHXxGl6PNHkoIzvXXN7UPdn2ecN35/HgU="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html",
+          "hash": "hxTtalcEqgmEK3H2gWmVpOTKPnkYh5LoeF1cbO8hij4="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "toc.html",
+          "hash": "7F7NcqJuRoxlBjc+VPKiCPqPWi6BdjaHsJCxPfUd5d0="
+        }
+      },
+      "is_incremental": false,
+      "version": ""
+    }
+  ],
+  "incremental_info": [
+    {
+      "status": {
+        "can_incremental": false,
+        "details": "Cannot build incrementally because last build info is missing.",
+        "incrementalPhase": "build",
+        "total_file_count": 0,
+        "skipped_file_count": 0,
+        "full_build_reason_code": "NoAvailableBuildCache"
+      },
+      "processors": {
+        "ConceptualDocumentProcessor": {
+          "can_incremental": false,
+          "incrementalPhase": "build",
+          "total_file_count": 1,
+          "skipped_file_count": 0
+        },
+        "ManagedReferenceDocumentProcessor": {
+          "can_incremental": false,
+          "incrementalPhase": "build",
+          "total_file_count": 5,
+          "skipped_file_count": 0
+        },
+        "TocDocumentProcessor": {
+          "can_incremental": false,
+          "details": "Processor TocDocumentProcessor cannot support incremental build because the processor doesn't implement ISupportIncrementalDocumentProcessor interface.",
+          "incrementalPhase": "build",
+          "total_file_count": 0,
+          "skipped_file_count": 0
+        }
+      }
+    },
+    {
+      "status": {
+        "can_incremental": false,
+        "details": "Cannot support incremental post processing, the reason is: should not trace intermediate info.",
+        "incrementalPhase": "postProcessing",
+        "total_file_count": 0,
+        "skipped_file_count": 0
+      },
+      "processors": {}
+    }
+  ],
+  "version_info": {},
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}
