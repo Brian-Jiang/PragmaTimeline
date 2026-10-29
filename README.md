@@ -1,5 +1,5 @@
 # Pragma Timeline
-#### version 0.7.2
+#### version 0.8.0
 
 ## Summary
 Pragma Timeline is a tool that can let you easily play timeline in runtime and bind to your scene objects.

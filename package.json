@@ -1,15 +1,15 @@
 {
   "name": "com.xiaojiang.pragmatimeline",
   "displayName": "Pragma Timeline",
-  "version": "0.7.2",
-  "unity": "2020.3",
+  "version": "0.8.0",
+  "unity": "2022.3",
   "author": {
     "name": "Xiao Jiang",
     "email": "bjjx1999@live.com"
   },
   "description": "Pragma Timeline.",
   "dependencies": {
-    "com.unity.timeline": ""
+    "com.unity.timeline": "1.7.0"
   },
   "samples": [
     {
