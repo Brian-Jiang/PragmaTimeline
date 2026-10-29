@@ -31,8 +31,9 @@ namespace PragmaFramework.Timeline.Runtime {
 
         private Dictionary<PropertyName, SubPlayerBindInfo> subPlayerBindMap;
 
-        private List<TimelinePlayer> runtimeChildren;
+        private List<TimelinePlayer> runtimeChildren = new List<TimelinePlayer>();
         private TimelinePlayer runtimeParent;
+        private readonly List<GameObject> ownedInstances = new List<GameObject>();
 
         public event Action<PlayableDirector> Stopped {
             add => Director.stopped += value;
@@ -63,6 +64,13 @@ namespace PragmaFramework.Timeline.Runtime {
         /// </summary>
         /// <param name="bindingMap"></param>
         public void Init(IReadOnlyDictionary<string, object> bindingMap) {
+            if (Director.state == PlayState.Playing) {
+                // Started by Play On Awake before the bindings were applied.
+                Debug.LogWarning($"Timeline '{name}' was already playing before {nameof(Init)}; " +
+                                 "disable Play On Awake on its PlayableDirector.", this);
+                Director.Stop();
+            }
+
             RestoreBindings(bindingMap);
 
             initialized = true;
@@ -73,14 +81,22 @@ namespace PragmaFramework.Timeline.Runtime {
         /// </summary>
         /// <param name="autoDestroyOnStop">Auto destroy when the timeline stop.</param>
         public void PlayTimeline(bool autoDestroyOnStop = false) {
-            if (!initialized) return;
-
-            if (autoDestroyOnStop) {
-                Director.stopped += director => {
-                    ClearTimeline();
-                };
+            if (!initialized) {
+                Debug.LogWarning($"{nameof(PlayTimeline)} called on '{name}' before {nameof(Init)}; ignoring.", this);
+                return;
             }
-            
+
+            Director.stopped -= OnDirectorStopped;
+            if (autoDestroyOnStop) {
+                Director.stopped += OnDirectorStopped;
+
+                var wrapMode = Director.extrapolationMode;
+                if (wrapMode == DirectorWrapMode.Hold || wrapMode == DirectorWrapMode.Loop) {
+                    Debug.LogWarning($"Timeline '{name}' uses wrap mode {wrapMode}, which never stops by itself, " +
+                                     $"so it won't auto destroy; call {nameof(ClearTimeline)} instead.", this);
+                }
+            }
+
             Director.time = 0d;
             Director.Play();
         }
@@ -90,11 +106,44 @@ namespace PragmaFramework.Timeline.Runtime {
         /// </summary>
         public void ClearTimeline() {
             Director.Stop();
-            runtimeChildren.ForEach(child => child.ClearTimeline());
-            runtimeChildren.ForEach(child => Destroy(child.gameObject));
-            runtimeChildren.Clear();
-            runtimeParent = null;
+            ReleaseRuntime();
             Destroy(gameObject);
+        }
+
+        private void OnDestroy() {
+            ReleaseRuntime();
+        }
+
+        private void OnDirectorStopped(PlayableDirector director) {
+            ClearTimeline();
+        }
+
+        /// <summary>
+        /// Detach from the parent and destroy the sub timeline instances this player created.
+        /// </summary>
+        private void ReleaseRuntime() {
+            if (playableDirector != null) {
+                playableDirector.stopped -= OnDirectorStopped;
+            }
+
+            foreach (var child in runtimeChildren) {
+                if (child == null) continue;
+
+                child.runtimeParent = null;
+                child.ReleaseRuntime();
+            }
+            runtimeChildren.Clear();
+
+            foreach (var instance in ownedInstances) {
+                if (instance != null) Destroy(instance);
+            }
+            ownedInstances.Clear();
+
+            if (runtimeParent != null) {
+                runtimeParent.runtimeChildren.Remove(this);
+                runtimeParent.ownedInstances.Remove(gameObject);
+                runtimeParent = null;
+            }
         }
 
         private void RestoreBindings(IReadOnlyDictionary<string, object> bindingMap, TimelinePlayer parent = null) {
@@ -122,6 +171,7 @@ namespace PragmaFramework.Timeline.Runtime {
                     player = subPlayer;
                 } else {
                     var instance = Instantiate(subPlayer.gameObject);
+                    ownedInstances.Add(instance);
                     Director.SetReferenceValue(hashName, instance);
                     player = instance.GetComponent<TimelinePlayer>();
                 }
@@ -153,7 +203,8 @@ namespace PragmaFramework.Timeline.Runtime {
 #if UNITY_EDITOR
         public void SaveTimeline() {
             if (PrefabUtility.IsPartOfPrefabAsset(gameObject)) {
-                Debug.LogError("Is prefab asset");
+                Debug.LogError($"{nameof(SaveTimeline)} must run on an instance in a scene or Prefab Mode, " +
+                               "not on a prefab asset.", this);
                 return;
             }
 
@@ -246,10 +297,12 @@ namespace PragmaFramework.Timeline.Runtime {
                                     subPlayer = prefabPlayer,
                                 });
                             } else {
-                                Debug.LogError(null);
+                                Debug.LogError($"Sub timeline '{subKey}': prefab '{prefabPath}' has no " +
+                                               $"{nameof(TimelinePlayer)} on its root; skipped.", subPlayer);
                             }
                         } else {
-                            Debug.LogError(null);
+                            Debug.LogError($"Sub timeline '{subKey}' ('{bindGO.name}') must be a child of '{name}' " +
+                                           "or a prefab instance root to be restored at runtime; skipped.", bindGO);
                         }
                             
                     } else {
